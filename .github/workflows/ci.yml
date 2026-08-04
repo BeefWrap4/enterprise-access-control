@@ -8,16 +8,25 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - name: Validate Keycloak realm JSON
         run: python -m json.tool keycloak/realm-baseops.json >/dev/null
       - name: Validate Compose configuration
         run: docker compose config --quiet
+      - name: Scan tracked files for credential material
+        run: python scripts/check_secrets.py
       - name: Compile and test Cerbos policies
         run: >-
           docker run --rm
           -v "$PWD/cerbos:/workspace"
           ghcr.io/cerbos/cerbos:0.54.0@sha256:211c261f6031675522a35c6055b13fd719c4aff13747307e4bcb6907326537ef
           compile /workspace/policies --tests=/workspace/tests --no-color
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/dependency-review-action@v4
+        with: {fail-on-severity: high}
