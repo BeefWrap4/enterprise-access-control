@@ -96,13 +96,15 @@ function Set-ServiceAccountRoles([object]$Client, [string[]]$ExpectedRoles, [str
     Write-Host "[SYNC] service account roles $($Client.clientId): $($ExpectedRoles -join ', ')"
 }
 
-$ragRole = $realm.roles.realm | Where-Object name -eq "rag-search-service"
-Ensure-RealmRole $ragRole
+foreach ($roleName in "rag-search-service", "knowledge-version-publisher", "session-delegator") {
+    $role = $realm.roles.realm | Where-Object name -eq $roleName
+    Ensure-RealmRole $role
+}
 
 $clientRoles = @{
     "agent-mcp" = @("service", "rag-search-service")
-    "rag-cache-client" = @("service")
-    "agent-model-client" = @("service")
+    "rag-cache-client" = @("service", "knowledge-version-publisher", "session-delegator")
+    "agent-model-client" = @("service", "session-delegator")
 }
 
 foreach ($clientId in $clientRoles.Keys) {

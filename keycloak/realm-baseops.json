@@ -18,8 +18,10 @@
       {"name": "test", "description": "Test user"},
       {"name": "approver", "description": "Independent L3 approval reviewer"},
       {"name": "admin", "description": "Application administrator"},
-      {"name": "service", "description": "Machine workload identity"},
-      {"name": "rag-search-service", "description": "Service identity limited to RAG query operations"}
+        {"name": "service", "description": "Machine workload identity"},
+        {"name": "rag-search-service", "description": "Service identity limited to RAG query operations"},
+        {"name": "knowledge-version-publisher", "description": "Service identity allowed to publish monotonic knowledge version events"},
+        {"name": "session-delegator", "description": "Service identity allowed to persist sessions for an authenticated upstream user"}
     ]
   },
   "clients": [
@@ -170,7 +172,7 @@
     {"username": "other-workspace-user", "enabled": true, "emailVerified": true, "firstName": "Other Workspace", "lastName": "User", "email": "other-user@example.invalid", "attributes": {"workspace_id": ["other"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["ops"], "credentials": [{"type": "password", "value": "Other-demo-2026!", "temporary": false}]},
     {"username": "service-account-aegra-worker", "enabled": true, "serviceAccountClientId": "aegra-worker", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service"]},
     {"username": "service-account-agent-mcp", "enabled": true, "serviceAccountClientId": "agent-mcp", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service", "rag-search-service"]},
-    {"username": "service-account-rag-cache-client", "enabled": true, "serviceAccountClientId": "rag-cache-client", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service"]},
-    {"username": "service-account-agent-model-client", "enabled": true, "serviceAccountClientId": "agent-model-client", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service"]}
+      {"username": "service-account-rag-cache-client", "enabled": true, "serviceAccountClientId": "rag-cache-client", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service", "knowledge-version-publisher", "session-delegator"]},
+    {"username": "service-account-agent-model-client", "enabled": true, "serviceAccountClientId": "agent-model-client", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service", "session-delegator"]}
   ]
 }

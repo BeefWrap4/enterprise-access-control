@@ -34,7 +34,7 @@ flowchart LR
 | negative test | `viewer-user` | `Viewer-demo-2026!` | `viewer` |
 | tenant isolation test | `other-workspace-user` | `Other-demo-2026!` | `ops` |
 
-服务到服务身份使用独立 Client Credentials：`aegra-worker` 仅面向 `agent-backend`，`agent-mcp` 仅面向 `rag-backend` 且只持有 `rag-search-service` 查询角色，`rag-cache-client` 与 `agent-model-client` 仅面向 `cache-backend`。四类工作负载均不复用浏览器用户 Token，也不共享客户端密钥。
+服务到服务身份使用独立 Client Credentials：`aegra-worker` 仅面向 `agent-backend`，`agent-mcp` 仅面向 `rag-backend` 且只持有 `rag-search-service` 查询角色，`rag-cache-client` 与 `agent-model-client` 仅面向 `cache-backend`。`rag-cache-client` 额外持有 `knowledge-version-publisher`；两个缓存调用方持有 `session-delegator`，可代表已经过各自后端验证的上游用户写入会话，但不能取得管理员权限。四类工作负载均不复用浏览器用户 Token，也不共享客户端密钥。
 
 ## 启动与验证
 

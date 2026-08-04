@@ -69,8 +69,11 @@ Assert-Equal ($serviceMe.roles -contains "rag-search-service") $true "MCP servic
 Assert-Equal ($serviceMe.roles -contains "ops") $false "MCP service identity does not carry broad ops role"
 $ragCacheMe = Invoke-RestMethod -Uri "http://localhost:8102/api/v1/auth/me" -Headers @{ Authorization = "Bearer $ragCacheToken" }
 Assert-Equal $ragCacheMe.service $true "RAG model client is accepted by cache gateway"
+Assert-Equal ($ragCacheMe.roles -contains "knowledge-version-publisher") $true "RAG client can publish knowledge version events"
+Assert-Equal ($ragCacheMe.roles -contains "session-delegator") $true "RAG client can persist upstream user sessions"
 $agentModelMe = Invoke-RestMethod -Uri "http://localhost:8102/api/v1/auth/me" -Headers @{ Authorization = "Bearer $agentModelToken" }
 Assert-Equal $agentModelMe.service $true "Agent model client is accepted by cache gateway"
+Assert-Equal ($agentModelMe.roles -contains "session-delegator") $true "Agent client can persist upstream user sessions"
 $otherDocuments = Invoke-RestMethod -Uri "http://localhost:8101/api/v1/documents" -Headers @{ Authorization = "Bearer $otherToken" }
 Assert-Equal @($otherDocuments).Count 0 "RAG filters another workspace"
 
