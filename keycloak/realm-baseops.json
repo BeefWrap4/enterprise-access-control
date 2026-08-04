@@ -18,7 +18,8 @@
       {"name": "test", "description": "Test user"},
       {"name": "approver", "description": "Independent L3 approval reviewer"},
       {"name": "admin", "description": "Application administrator"},
-      {"name": "service", "description": "Machine workload identity"}
+      {"name": "service", "description": "Machine workload identity"},
+      {"name": "rag-search-service", "description": "Service identity limited to RAG query operations"}
     ]
   },
   "clients": [
@@ -114,6 +115,38 @@
       ]
     },
     {
+      "clientId": "rag-cache-client",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "rag-cache-client-dev-secret",
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "protocolMappers": [
+        {"name": "cache-api-audience", "protocol": "openid-connect", "protocolMapper": "oidc-audience-mapper", "consentRequired": false, "config": {"included.client.audience": "cache-backend", "access.token.claim": "true", "introspection.token.claim": "true"}},
+        {"name": "workspace-id", "protocol": "openid-connect", "protocolMapper": "oidc-hardcoded-claim-mapper", "consentRequired": false, "config": {"claim.name": "workspace_id", "claim.value": "demo", "jsonType.label": "String", "access.token.claim": "true", "introspection.token.claim": "true"}},
+        {"name": "clearance", "protocol": "openid-connect", "protocolMapper": "oidc-hardcoded-claim-mapper", "consentRequired": false, "config": {"claim.name": "clearance", "claim.value": "3", "jsonType.label": "long", "access.token.claim": "true", "introspection.token.claim": "true"}},
+        {"name": "claim-version", "protocol": "openid-connect", "protocolMapper": "oidc-hardcoded-claim-mapper", "consentRequired": false, "config": {"claim.name": "claim_version", "claim.value": "kc-26.7", "jsonType.label": "String", "access.token.claim": "true", "introspection.token.claim": "true"}}
+      ]
+    },
+    {
+      "clientId": "agent-model-client",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "agent-model-client-dev-secret",
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "protocolMappers": [
+        {"name": "cache-api-audience", "protocol": "openid-connect", "protocolMapper": "oidc-audience-mapper", "consentRequired": false, "config": {"included.client.audience": "cache-backend", "access.token.claim": "true", "introspection.token.claim": "true"}},
+        {"name": "workspace-id", "protocol": "openid-connect", "protocolMapper": "oidc-hardcoded-claim-mapper", "consentRequired": false, "config": {"claim.name": "workspace_id", "claim.value": "demo", "jsonType.label": "String", "access.token.claim": "true", "introspection.token.claim": "true"}},
+        {"name": "clearance", "protocol": "openid-connect", "protocolMapper": "oidc-hardcoded-claim-mapper", "consentRequired": false, "config": {"claim.name": "clearance", "claim.value": "3", "jsonType.label": "long", "access.token.claim": "true", "introspection.token.claim": "true"}},
+        {"name": "claim-version", "protocol": "openid-connect", "protocolMapper": "oidc-hardcoded-claim-mapper", "consentRequired": false, "config": {"claim.name": "claim_version", "claim.value": "kc-26.7", "jsonType.label": "String", "access.token.claim": "true", "introspection.token.claim": "true"}}
+      ]
+    },
+    {
       "clientId": "agent-mcp",
       "enabled": true,
       "publicClient": false,
@@ -136,6 +169,8 @@
     {"username": "viewer-user", "enabled": true, "emailVerified": true, "firstName": "Read Only", "lastName": "User", "email": "viewer-user@example.invalid", "attributes": {"workspace_id": ["demo"], "clearance": ["1"], "claim_version": ["kc-26.7"]}, "realmRoles": ["viewer"], "credentials": [{"type": "password", "value": "Viewer-demo-2026!", "temporary": false}]},
     {"username": "other-workspace-user", "enabled": true, "emailVerified": true, "firstName": "Other Workspace", "lastName": "User", "email": "other-user@example.invalid", "attributes": {"workspace_id": ["other"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["ops"], "credentials": [{"type": "password", "value": "Other-demo-2026!", "temporary": false}]},
     {"username": "service-account-aegra-worker", "enabled": true, "serviceAccountClientId": "aegra-worker", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service"]},
-    {"username": "service-account-agent-mcp", "enabled": true, "serviceAccountClientId": "agent-mcp", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service", "ops"]}
+    {"username": "service-account-agent-mcp", "enabled": true, "serviceAccountClientId": "agent-mcp", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service", "rag-search-service"]},
+    {"username": "service-account-rag-cache-client", "enabled": true, "serviceAccountClientId": "rag-cache-client", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service"]},
+    {"username": "service-account-agent-model-client", "enabled": true, "serviceAccountClientId": "agent-model-client", "attributes": {"workspace_id": ["demo"], "clearance": ["3"], "claim_version": ["kc-26.7"]}, "realmRoles": ["service"]}
   ]
 }

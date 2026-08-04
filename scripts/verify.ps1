@@ -53,6 +53,8 @@ $opsToken = Get-AccessToken "ops-user" "Ops-demo-2026!"
 $viewerToken = Get-AccessToken "viewer-user" "Viewer-demo-2026!"
 $otherToken = Get-AccessToken "other-workspace-user" "Other-demo-2026!"
 $mcpToken = Get-ServiceToken "agent-mcp" "agent-mcp-dev-secret"
+$ragCacheToken = Get-ServiceToken "rag-cache-client" "rag-cache-client-dev-secret"
+$agentModelToken = Get-ServiceToken "agent-model-client" "agent-model-client-dev-secret"
 
 foreach ($port in 8101, 8102, 8103) {
     Assert-Equal (Get-Status "http://localhost:$port/health/ready") 200 "API $port readiness"
@@ -63,7 +65,12 @@ foreach ($port in 8101, 8102, 8103) {
 Assert-Equal (Get-Status "http://localhost:8101/api/v1/documents" "Get" $viewerToken) 403 "RAG rejects viewer role"
 $serviceMe = Invoke-RestMethod -Uri "http://localhost:8101/api/v1/auth/me" -Headers @{ Authorization = "Bearer $mcpToken" }
 Assert-Equal $serviceMe.service $true "RAG accepts MCP service identity"
-Assert-Equal ($serviceMe.roles -contains "ops") $true "MCP service identity carries scoped ops role"
+Assert-Equal ($serviceMe.roles -contains "rag-search-service") $true "MCP service identity carries query-only role"
+Assert-Equal ($serviceMe.roles -contains "ops") $false "MCP service identity does not carry broad ops role"
+$ragCacheMe = Invoke-RestMethod -Uri "http://localhost:8102/api/v1/auth/me" -Headers @{ Authorization = "Bearer $ragCacheToken" }
+Assert-Equal $ragCacheMe.service $true "RAG model client is accepted by cache gateway"
+$agentModelMe = Invoke-RestMethod -Uri "http://localhost:8102/api/v1/auth/me" -Headers @{ Authorization = "Bearer $agentModelToken" }
+Assert-Equal $agentModelMe.service $true "Agent model client is accepted by cache gateway"
 $otherDocuments = Invoke-RestMethod -Uri "http://localhost:8101/api/v1/documents" -Headers @{ Authorization = "Bearer $otherToken" }
 Assert-Equal @($otherDocuments).Count 0 "RAG filters another workspace"
 

@@ -34,17 +34,18 @@ flowchart LR
 | negative test | `viewer-user` | `Viewer-demo-2026!` | `viewer` |
 | tenant isolation test | `other-workspace-user` | `Other-demo-2026!` | `ops` |
 
-服务到服务身份使用独立 Client Credentials：`aegra-worker` 仅面向 `agent-backend`，`agent-mcp` 仅面向 `rag-backend`，不复用浏览器用户 Token。
+服务到服务身份使用独立 Client Credentials：`aegra-worker` 仅面向 `agent-backend`，`agent-mcp` 仅面向 `rag-backend` 且只持有 `rag-search-service` 查询角色，`rag-cache-client` 与 `agent-model-client` 仅面向 `cache-backend`。四类工作负载均不复用浏览器用户 Token，也不共享客户端密钥。
 
 ## 启动与验证
 
 ```powershell
 docker compose up -d
+powershell -ExecutionPolicy Bypass -File scripts/apply-realm-delta.ps1
 powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
 python scripts/benchmark_access_control.py --requests 200 --concurrency 20
 ```
 
-Keycloak 地址为 `http://localhost:8180`，管理健康端口为 `9000`；Cerbos HTTP/gRPC 端口为 `3592/3593`。三套业务应用应先启动本控制平面，再启动各自 Compose。
+Keycloak 地址为 `http://localhost:8180`，管理健康端口为 `9000`；Cerbos HTTP/gRPC 端口为 `3592/3593`。三套业务应用应先启动本控制平面，再启动各自 Compose。已有 Keycloak 数据卷不会被 Realm 导入覆盖，变更客户端或角色后必须运行 `apply-realm-delta.ps1`；该脚本通过 Admin API 幂等更新，不删除 Realm、用户或业务数据。
 
 `verify.ps1` 同时校验 Keycloak/Cerbos 健康、三套 API 的身份正向链路、无 Token/无角色负向链路、跨 workspace 隔离和 Cerbos allow/deny。性能脚本只记录当前单机复现环境的延迟与错误率，不代表生产 SLO。
 
