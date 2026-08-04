@@ -1,0 +1,91 @@
+name: Agent Tool Gateway policy
+description: Workspace, station scope, long-window elevation and L3 approval rules
+principals:
+  ops:
+    id: ops-user
+    roles: [ops]
+    attr: {workspace_id: demo}
+  reviewer:
+    id: reviewer-user
+    roles: [approver]
+    attr: {workspace_id: demo}
+  admin:
+    id: admin-user
+    roles: [admin]
+    attr: {workspace_id: demo}
+resources:
+  read_short:
+    kind: agent_tool
+    id: query_alarms
+    attr: {workspace_id: demo, station_allowed: true, long_window: false, risk: L1, approval_consumed: false}
+  read_long:
+    kind: agent_tool
+    id: query_alarms_long
+    attr: {workspace_id: demo, station_allowed: true, long_window: true, risk: L1, approval_consumed: false}
+  write_pending:
+    kind: agent_tool
+    id: archive_pending
+    attr: {workspace_id: demo, station_allowed: true, long_window: false, risk: L3, approval_consumed: false}
+  write_consumed:
+    kind: agent_tool
+    id: archive_consumed
+    attr: {workspace_id: demo, station_allowed: true, long_window: false, risk: L3, approval_consumed: true}
+  forbidden_station:
+    kind: agent_tool
+    id: forbidden_station
+    attr: {workspace_id: demo, station_allowed: false, long_window: false, risk: L1, approval_consumed: false}
+tests:
+  - name: operations can execute scoped short read
+    input:
+      principals: [ops]
+      resources: [read_short]
+      actions: [execute]
+    expected:
+      - principal: ops
+        resource: read_short
+        actions: {execute: EFFECT_ALLOW}
+  - name: operations cannot expand the time window
+    input:
+      principals: [ops]
+      resources: [read_long]
+      actions: [execute]
+    expected:
+      - principal: ops
+        resource: read_long
+        actions: {execute: EFFECT_DENY}
+  - name: approver can execute elevated read
+    input:
+      principals: [reviewer]
+      resources: [read_long]
+      actions: [execute]
+    expected:
+      - principal: reviewer
+        resource: read_long
+        actions: {execute: EFFECT_ALLOW}
+  - name: unconsumed L3 action is denied
+    input:
+      principals: [ops]
+      resources: [write_pending]
+      actions: [execute]
+    expected:
+      - principal: ops
+        resource: write_pending
+        actions: {execute: EFFECT_DENY}
+  - name: consumed L3 action is allowed once by business transaction
+    input:
+      principals: [ops]
+      resources: [write_consumed]
+      actions: [execute]
+    expected:
+      - principal: ops
+        resource: write_consumed
+        actions: {execute: EFFECT_ALLOW}
+  - name: forbidden station is denied
+    input:
+      principals: [admin]
+      resources: [forbidden_station]
+      actions: [execute]
+    expected:
+      - principal: admin
+        resource: forbidden_station
+        actions: {execute: EFFECT_DENY}

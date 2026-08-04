@@ -1,0 +1,38 @@
+apiVersion: api.cerbos.dev/v1
+resourcePolicy:
+  resource: agent_tool
+  version: default
+  rules:
+    - actions: ["execute"]
+      effect: EFFECT_ALLOW
+      roles: ["ops", "rd", "test", "approver", "admin"]
+      condition:
+        match:
+          all:
+            of:
+              - expr: request.resource.attr.workspace_id == request.principal.attr.workspace_id
+              - expr: request.resource.attr.station_allowed == true
+              - expr: request.resource.attr.long_window == false
+              - expr: request.resource.attr.risk != "L3"
+    - actions: ["execute"]
+      effect: EFFECT_ALLOW
+      roles: ["approver", "admin"]
+      condition:
+        match:
+          all:
+            of:
+              - expr: request.resource.attr.workspace_id == request.principal.attr.workspace_id
+              - expr: request.resource.attr.station_allowed == true
+              - expr: request.resource.attr.long_window == true
+              - expr: request.resource.attr.risk != "L3"
+    - actions: ["execute"]
+      effect: EFFECT_ALLOW
+      roles: ["ops", "admin"]
+      condition:
+        match:
+          all:
+            of:
+              - expr: request.resource.attr.workspace_id == request.principal.attr.workspace_id
+              - expr: request.resource.attr.station_allowed == true
+              - expr: request.resource.attr.risk == "L3"
+              - expr: request.resource.attr.approval_consumed == true
